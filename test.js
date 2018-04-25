@@ -1,7 +1,14 @@
 const http = require('http');
 const net = require('net');
+const events = require('events');
 const port = 8080;
+const emitter = new events.EventEmitter();
 let name = "";
+
+emitter.on('enter', function(name, socket) {
+	console.log("Hello, " + name + "!");
+	socket.write("Hello, " + name + "!");
+});
 
 net.createServer(socket => {
 	if (name == "")
@@ -9,7 +16,7 @@ net.createServer(socket => {
 	socket.on('data', data => {
 		dataStr = data.toString();
 		if (dataStr == "\r" || dataStr == "\n" || dataStr == "\r\n") {
-			socket.write("Hello, " + name + "!");
+			emitter.emit('enter', name, socket);
 			socket.destroy();
 		} else
 			name += dataStr;
