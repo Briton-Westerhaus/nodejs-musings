@@ -16,6 +16,7 @@
   "author": "Briton Westerhaus",
   "license": "UNLICENSED",
   "dependencies": {
-    "express": "^4.16.2"
+    "express": "^4.16.2",
+    "nodemailer": "^5.1.1"
   }
 }
