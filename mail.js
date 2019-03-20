@@ -18,10 +18,11 @@ transporter.sendMail({
 });
 
 http.createServer((req, res) => {
+    console.log("Request received!");
 	if (req.method === 'POST') {
         let message = '';
         let subject = '';
-		req.on('data', chunk => {
+        req.on('data', chunk => {
             chunk = chunk.toString().split('=');
             if (chunk[0] == "name")
                 subject = "Message from " + chunk[1];
