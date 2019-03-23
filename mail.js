@@ -10,7 +10,17 @@ let transporter = nodemailer.createTransport({
 
 http.createServer((req, res) => {
     console.log("Request received!");
-	if (req.method === 'POST') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+	res.setHeader('Access-Control-Request-Method', '*');
+	res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, POST');
+	res.setHeader('Access-Control-Allow-Headers', '*');
+	if (req.method === 'OPTIONS') {
+        console.log("Options received!");
+		res.writeHead(200);
+		res.end();
+		return;
+    } else if (req.method === 'POST') {
+        console.log("Post received!");
         let message = '';
         let subject = '';
         req.on('data', chunk => {
@@ -31,7 +41,9 @@ http.createServer((req, res) => {
                 console.log(info.messageId);
             });
 		});
-	}
+	} else{
+        console.log(req.method + " received")
+    }
 }).listen(port, () => {
 	console.log('listening on: http://localhost:%s', port);
 });
