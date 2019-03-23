@@ -18,7 +18,6 @@ http.createServer((req, res) => {
         console.log("Options received!");
 		res.writeHead(200);
 		res.end();
-		return;
     } else if (req.method === 'POST') {
         console.log("Post received!");
         let message = '';
