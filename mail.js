@@ -10,31 +10,27 @@ let transporter = nodemailer.createTransport({
 
 http.createServer((req, res) => {
     console.log("Request received!");
-    res.setHeader('Access-Control-Allow-Origin', '*');
-	res.setHeader('Access-Control-Request-Method', '*');
-	res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, POST');
-	res.setHeader('Access-Control-Allow-Headers', '*');
+
 	if (req.method === 'OPTIONS') {
         console.log("Options received!");
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Request-Method', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, POST');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 		res.writeHead(200);
 		res.end();
     } else if (req.method === 'POST') {
         console.log("Post received!");
-        let message = '';
-        let subject = '';
+        let postData;
         req.on('data', chunk => {
-            chunk = chunk.toString().split('=');
-            if (chunk[0] == "name")
-                subject = "Message from " + chunk[1];
-            if (chunk[0] == "message")
-                message = chunk[1]; 
+            postData = JSON.parse(chunk.toString());
 		});
 		req.on('end', () => {
             transporter.sendMail({
                 from: 'me@BritonWesterhaus.com',
                 to: 'Briton.Westerhaus@gmail.com',
-                subject: subject,
-                text: message
+                subject: postData.subject,
+                text: postData.message
             }, (err, info) => {
                 console.log(info.envelope);
                 console.log(info.messageId);
