@@ -27,7 +27,7 @@ http.createServer((req, res) => {
 		});
 		req.on('end', () => {
             transporter.sendMail({
-                from: '"' + postData.postData.name + '"<' + postData.email + '>',
+                from: '"' + postData.name + '"<' + postData.email + '>',
                 to: 'Briton.Westerhaus@gmail.com',
                 subject: "Message from ",
                 text: postData.message + " " + (!!postData.phoneNumber ? "Phone number: " + postData.phoneNumber : "")
