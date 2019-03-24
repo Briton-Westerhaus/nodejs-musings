@@ -27,10 +27,10 @@ http.createServer((req, res) => {
 		});
 		req.on('end', () => {
             transporter.sendMail({
-                from: 'me@BritonWesterhaus.com',
+                from: '"' + postData.postData.name + '"<' + postData.email + '>',
                 to: 'Briton.Westerhaus@gmail.com',
-                subject: postData.subject,
-                text: postData.message
+                subject: "Message from ",
+                text: postData.message + " " + (!!postData.phoneNumber ? "Phone number: " + postData.phoneNumber : "")
             }, (err, info) => {
                 console.log(info.envelope);
                 console.log(info.messageId);
