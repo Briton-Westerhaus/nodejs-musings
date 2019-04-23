@@ -1,9 +1,26 @@
 const http = require('http');
 const net = require('net');
+const mysql = require('mysql');
 const events = require('events');
 const port = 8080;
 const emitter = new events.EventEmitter();
 let name = "";
+
+let con = mysql.createConnection({
+	host: "britonwesterhaus.com",
+	user: "root",
+	password: "***********", //This isn't a valid pasword!
+	database: "britonwesterhaus"
+});
+
+con.connect(function(err) {
+	if (err) throw err;
+	console.log("Connected!");
+	con.query("INSERT INTO contact(name, email_address, phone_number, message, captcha, ip_address) VALUES('Briton Westerhaus', 'Briton.Westerhaus@gmail.com', '814-777-1736', 'test', true, '192.168.1.1')", function (err, result) {
+		if (err) throw err;
+		console.log("Result: " + result);
+	});
+}); 
 
 //emitter.on('enter', function(name, socket) {
 //	console.log("Hello, " + name + "!");
@@ -24,7 +41,7 @@ let name = "";
 //}).listen(port);
 
 
-
+/*
 http.createServer((req, res) => {
 	if (req.method === 'POST') {
 		let body = '';
@@ -38,4 +55,4 @@ http.createServer((req, res) => {
 	}
 }).listen(port, () => {
 	console.log('listening on: http://localhost:%s', port);
-});
+});*/
