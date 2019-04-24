@@ -6,10 +6,12 @@ const port = 8080;
 const emitter = new events.EventEmitter();
 let name = "";
 
+console.log(process.argv);
+
 let con = mysql.createConnection({
 	host: "britonwesterhaus.com",
 	user: "root",
-	password: "***********", //This isn't a valid pasword!
+	password: process.env.DB_PASSWORD,
 	database: "britonwesterhaus"
 });
 
