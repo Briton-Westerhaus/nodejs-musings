@@ -1,60 +1,55 @@
 const http = require('http');
-const net = require('net');
-const mysql = require('mysql');
-const events = require('events');
+const nodemailer = require('nodemailer');
 const port = 8080;
-const emitter = new events.EventEmitter();
-let name = "";
+const fs = require('fs');
 
-console.log(process.argv);
+let getParam = function(paramName) {
+    let param = process.argv.filter(function(param){
+        return param.split("=")[0] == paramName;
+    })[0];
 
-let con = mysql.createConnection({
-	host: "britonwesterhaus.com",
-	user: "root",
-	password: process.env.DB_PASSWORD,
-	database: "britonwesterhaus"
-});
+    if (param)
+        return param.split('=')[1];
+    else
+        return null;
+}
 
-con.connect(function(err) {
-	if (err) throw err;
-	console.log("Connected!");
-	con.query("INSERT INTO contact(name, email_address, phone_number, message, captcha, ip_address) VALUES('Briton Westerhaus', 'Briton.Westerhaus@gmail.com', '814-777-1736', 'test', true, '192.168.1.1')", function (err, result) {
-		if (err) throw err;
-		console.log("Result: " + result);
-	});
-}); 
+const PRIVATE_KEY = getParam("PRIVATE_KEY");
 
-//emitter.on('enter', function(name, socket) {
-//	console.log("Hello, " + name + "!");
-//	socket.write("Hello, " + name + "!");
-//});
+let privateKey, transporter;
+let dkim =  null;
 
-//net.createServer(socket => {
-//	if (name == "")
-//		socket.write("What is your name?")
-//	socket.on('data', data => {
-//		dataStr = data.toString();
-//		if (dataStr == "\r" || dataStr == "\n" || dataStr == "\r\n") {
-//			emitter.emit('enter', name, socket);
-//			socket.destroy();
-//		} else
-//			name += dataStr;
-//	})
-//}).listen(port);
+if (PRIVATE_KEY) {
+    fs.readFile(PRIVATE_KEY, 'utf8', function(err, data) {
+        privateKey = data;
+        if (err) {
+            privateKey = null;
+        }
+        if (privateKey) {
+            dkim = {
+                domainName: "BritonWesterhaus.com",
+                keySelector: "dkim",
+                privateKey: privateKey
+            };         
+        }
+        transporter = nodemailer.createTransport({
+            sendmail: true,
+            newline: 'unix',
+            path: '/usr/sbin/sendmail',
+            dkim: dkim
+        });   
+    });
+}
 
-
-/*
-http.createServer((req, res) => {
-	if (req.method === 'POST') {
-		let body = '';
-		req.on('data', chunk => {
-			body += chunk.toString(); // convert Buffer to string
-		});
-		req.on('end', () => {
-			console.log(body);
-			res.end('ok');
-		});
+transporter.sendMail({
+	from: 'contact-form@britonwesterhaus.com',
+	to: 'Briton.Westerhaus@gmail.com',
+	subject: "Spam Testing",
+	text: "I am trying to test if this is sent to spam",
+	headers: {
+		"Reply-To": '"Briton Westerhaus"<studmuffino@gmail.com>'
 	}
-}).listen(port, () => {
-	console.log('listening on: http://localhost:%s', port);
-});*/
+}, (err, info) => {
+	console.log(info.envelope);
+	console.log(info.messageId);
+});
