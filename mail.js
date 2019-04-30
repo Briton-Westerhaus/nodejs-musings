@@ -32,24 +32,25 @@ if (PRIVATE_KEY) {
                 privateKey: privateKey
             };         
         }
+        
         transporter = nodemailer.createTransport({
             sendmail: true,
             newline: 'unix',
             path: '/usr/sbin/sendmail',
             dkim: dkim
-        });   
+        });
+
+        transporter.sendMail({
+            from: 'contact-form@britonwesterhaus.com',
+            to: 'Briton.Westerhaus@gmail.com',
+            subject: "Spam Testing",
+            text: "I am trying to test if this is sent to spam",
+            headers: {
+                "Reply-To": '"Briton Westerhaus"<studmuffino@gmail.com>'
+            }
+        }, (err, info) => {
+            console.log(info.envelope);
+            console.log(info.messageId);
+        });
     });
 }
-
-transporter.sendMail({
-	from: 'contact-form@britonwesterhaus.com',
-	to: 'Briton.Westerhaus@gmail.com',
-	subject: "Spam Testing",
-	text: "I am trying to test if this is sent to spam",
-	headers: {
-		"Reply-To": '"Briton Westerhaus"<studmuffino@gmail.com>'
-	}
-}, (err, info) => {
-	console.log(info.envelope);
-	console.log(info.messageId);
-});
