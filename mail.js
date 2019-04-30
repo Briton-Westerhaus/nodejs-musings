@@ -1,44 +1,55 @@
 const http = require('http');
 const nodemailer = require('nodemailer');
 const port = 8080;
+const fs = require('fs');
 
-let transporter = nodemailer.createTransport({
-    sendmail: true,
-    newline: 'unix',
-    path: '/usr/sbin/sendmail'
-});
+let getParam = function(paramName) {
+    let param = process.argv.filter(function(param){
+        return param.split("=")[0] == paramName;
+    })[0];
 
-http.createServer((req, res) => {
-    console.log("Request received!");
+    if (param)
+        return param.split('=')[1];
+    else
+        return null;
+}
 
-	if (req.method === 'OPTIONS') {
-        console.log("Options received!");
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Access-Control-Request-Method', '*');
-        res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, POST');
-        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-		res.writeHead(200);
-		res.end();
-    } else if (req.method === 'POST') {
-        console.log("Post received!");
-        let postData;
-        req.on('data', chunk => {
-            postData = JSON.parse(chunk.toString());
-		});
-		req.on('end', () => {
-            transporter.sendMail({
-                from: '"' + postData.name + '"<' + postData.email + '>',
-                to: 'Briton.Westerhaus@gmail.com',
-                subject: "Message from ",
-                text: postData.message + " " + (!!postData.phoneNumber ? "Phone number: " + postData.phoneNumber : "")
-            }, (err, info) => {
-                console.log(info.envelope);
-                console.log(info.messageId);
-            });
-		});
-	} else{
-        console.log(req.method + " received")
-    }
-}).listen(port, () => {
-	console.log('listening on: http://localhost:%s', port);
+const PRIVATE_KEY = getParam("PRIVATE_KEY");
+
+let privateKey, transporter;
+let dkim =  null;
+
+if (PRIVATE_KEY) {
+    fs.readFile(PRIVATE_KEY, 'utf8', function(err, data) {
+        privateKey = data;
+        if (err) {
+            privateKey = null;
+        }
+        if (privateKey) {
+            dkim = {
+                domainName: "BritonWesterhaus.com",
+                keySelector: "dkim",
+                privateKey: privateKey
+            };         
+        }
+        transporter = nodemailer.createTransport({
+            sendmail: true,
+            newline: 'unix',
+            path: '/usr/sbin/sendmail',
+            dkim: dkim
+        });   
+    });
+}
+
+transporter.sendMail({
+	from: 'contact-form@britonwesterhaus.com',
+	to: 'Briton.Westerhaus@gmail.com',
+	subject: "Spam Testing",
+	text: "I am trying to test if this is sent to spam",
+	headers: {
+		"Reply-To": '"Briton Westerhaus"<studmuffino@gmail.com>'
+	}
+}, (err, info) => {
+	console.log(info.envelope);
+	console.log(info.messageId);
 });
